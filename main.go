@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/ComaVN/oddsyssee/internal/betting"
 	"github.com/shopspring/decimal"
@@ -18,6 +17,11 @@ func main() {
 	//  - games can have other odds than 1/1
 	//  - games can have multiple odds and probabilities, and betting strategies can take different odds at different times
 	single_win_probability := 18.0 / 37
+	var game betting.NextOutcomer
+	game = betting.NewFixedProbabilityGame(single_win_probability)
+	// game = betting.NewAlternatingGame(false)
+	// game = betting.WinningGame{}
+	// game = betting.LosingGame{}
 	min_bet := decimal.RequireFromString("5")
 	max_bet := decimal.RequireFromString("5")
 	bet_multiplier := decimal.NewFromInt(2)
@@ -70,7 +74,7 @@ func main() {
 			this_round_players := make([]*betting.Player, 0, len(players))
 			bet_sizes := make([]decimal.Decimal, 0, len(players))
 			for idx, pl := range players {
-				bet_size, ok := pl.PlayNextBet()
+				bet_size, ok := pl.PlaceNextBet()
 				if !ok {
 					fmt.Printf("    Player %d with betting system '%v' is out of money\n", idx, pl.BettingSystem.Name())
 					continue
@@ -79,7 +83,7 @@ func main() {
 				bet_sizes = append(bet_sizes, bet_size)
 				fmt.Printf("    Player %d with betting system '%v' current bank €%v, betted €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank.Add(bet_size), bet_size)
 			}
-			bet_won := rand.Float64() < single_win_probability
+			bet_won := game.NextOutcome()
 			if bet_won {
 				fmt.Println("    Players won")
 			} else {

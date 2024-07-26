@@ -17,7 +17,7 @@ type Player struct {
 	BettingSystem BettingSystem
 }
 
-func (pl *Player) PlayNextBet() (decimal.Decimal, bool) {
+func (pl *Player) PlaceNextBet() (decimal.Decimal, bool) {
 	if !pl.CurrentBank.IsPositive() {
 		return decimal.Decimal{}, false
 	}

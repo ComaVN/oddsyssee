@@ -29,7 +29,7 @@ func (pl *Player) PlayNextBet() (decimal.Decimal, bool) {
 
 func (pl *Player) Win(won_amount decimal.Decimal) bool {
 	pl.CurrentBank = pl.CurrentBank.Add(won_amount)
-	return pl.CurrentBank.GreaterThanOrEqual(pl.Bankroll.Add(pl.TargetWin))
+	return pl.CurrentBank.GreaterThanOrEqual(pl.WinTarget)
 }
 
 func (pl *Player) Lose() bool {

@@ -11,12 +11,12 @@ import (
 // Contains the properties of the player at the start of the gambling session
 type PlayerProps struct {
 	Bankroll  decimal.Decimal
-	TargetWin decimal.Decimal
+	WinTarget decimal.Decimal
 }
 
-func NewPlayerProps(bankroll decimal.Decimal, target_win decimal.Decimal) PlayerProps {
+func NewPlayerProps(bankroll decimal.Decimal, win_target decimal.Decimal) PlayerProps {
 	return PlayerProps{
 		Bankroll:  bankroll,
-		TargetWin: target_win,
+		WinTarget: win_target,
 	}
 }

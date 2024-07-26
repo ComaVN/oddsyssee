@@ -25,7 +25,7 @@ func main() {
 	// Player properties
 	player_props := betting.NewPlayerProps(
 		decimal.RequireFromString("1000"),
-		decimal.RequireFromString("100"),
+		decimal.RequireFromString("1100"),
 	)
 	betting_strategies := []betting.BettingSystem{
 		betting.NewSingleBetStrategy(player_props),
@@ -40,7 +40,7 @@ func main() {
 		"  Maximum bet: €%v\n"+
 		"Player properties:\n"+
 		"  Bankroll: €%v\n"+
-		"  Target winnings: €%v\n"+
+		"  Win Target: €%v\n"+
 		"Simulation properties:\n"+
 		"  runs: %d\n"+
 		"\n",
@@ -48,7 +48,7 @@ func main() {
 		min_bet.StringFixedBank(2),
 		max_bet.StringFixedBank(2),
 		player_props.Bankroll.StringFixedBank(2),
-		player_props.TargetWin.StringFixedBank(2),
+		player_props.WinTarget.StringFixedBank(2),
 		sim_repeats,
 	)
 
@@ -78,7 +78,7 @@ func main() {
 					target_reached := pl.Win(bet_payout)
 					fmt.Printf("    Player %d with betting system '%v' current bank €%v, won €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, bet_payout)
 					if target_reached {
-						fmt.Printf("    Player %d with betting system '%v' current bank €%v, has reached their target win of €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, pl.TargetWin)
+						fmt.Printf("    Player %d with betting system '%v' current bank €%v, has reached their win target of €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, pl.WinTarget)
 						players = append(players[:idx], players[idx+1:]...)
 					}
 				} else {

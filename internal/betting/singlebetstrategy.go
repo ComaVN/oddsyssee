@@ -10,11 +10,13 @@ import (
 
 type singleBetStrategy struct {
 	PlayerProps
+	BetSize decimal.Decimal
 }
 
 func NewSingleBetStrategy(playerProps PlayerProps) *singleBetStrategy {
 	return &singleBetStrategy{
 		PlayerProps: playerProps,
+		BetSize:     playerProps.WinTarget.Sub(playerProps.Bankroll),
 	}
 }
 
@@ -25,7 +27,7 @@ func (bs *singleBetStrategy) Name() string {
 
 // Implements BettingSystem
 func (bs *singleBetStrategy) NextBet(current_bank decimal.Decimal) decimal.Decimal {
-	return bs.TargetWin
+	return bs.BetSize
 }
 
 func (bs *singleBetStrategy) NewPlayer() *Player {

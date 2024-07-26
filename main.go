@@ -16,7 +16,7 @@ func main() {
 	// Game properties
 	// TODO: this should be way more parameterized:
 	//  - games can have other odds than 1/1
-	//  - games can have different odds and probabilities, and betting strategies can take different odds at different times
+	//  - games can have multiple odds and probabilities, and betting strategies can take different odds at different times
 	single_win_probability := 18.0 / 37
 	min_bet := decimal.RequireFromString("5")
 	max_bet := decimal.RequireFromString("5")
@@ -35,7 +35,7 @@ func main() {
 	sim_repeats := 10 // Number of tines the full simulation is repeated
 
 	fmt.Printf("Game properties:\n"+
-		"  Probability to win one round: %.2f%%\n"+
+		"  Probability to win one bet: %.2f%%\n"+
 		"  Minimum bet: €%v\n"+
 		"  Maximum bet: €%v\n"+
 		"Player properties:\n"+
@@ -62,6 +62,7 @@ func main() {
 		}
 		for len(players) > 0 {
 			// TODO: there should be a way to catch strategies that never win or lose
+			bet_won := rand.Float64() < single_win_probability
 			for idx := len(players) - 1; idx >= 0; idx-- {
 				pl := players[idx]
 				fmt.Printf("    Player %d with betting system '%v' current bank €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank)
@@ -72,8 +73,7 @@ func main() {
 					continue
 				}
 				fmt.Printf("    Player %d with betting system '%v' current bank €%v, betted €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, bet_size)
-				if rand.Float64() < single_win_probability {
-					// Player won
+				if bet_won {
 					bet_payout := bet_size.Mul(bet_multiplier)
 					target_reached := pl.Win(bet_payout)
 					fmt.Printf("    Player %d with betting system '%v' current bank €%v, won €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, bet_payout)
@@ -82,7 +82,6 @@ func main() {
 						players = append(players[:idx], players[idx+1:]...)
 					}
 				} else {
-					// Player lost
 					fmt.Printf("    Player %d with betting system '%v' current bank €%v, lost\n", idx, pl.BettingSystem.Name(), pl.CurrentBank)
 					if pl.Lose() {
 						fmt.Printf("    Player %d with betting system '%v' is out of money\n", idx, pl.BettingSystem.Name())

@@ -29,6 +29,8 @@ func main() {
 	)
 	betting_strategies := []betting.BettingSystem{
 		betting.NewSingleBetStrategy(player_props),
+		betting.NewMartingaleStrategy(player_props),
+		betting.NewOscarsGrindStrategy(player_props),
 	}
 
 	// Simulation properties
@@ -53,43 +55,56 @@ func main() {
 	)
 
 	fmt.Println("Starting simulation")
-	for i := 0; i < sim_repeats; i++ {
+	for i := 1; i <= sim_repeats; i++ {
 		fmt.Printf("  Run %d\n", i)
 		// Initialize players for each strategy
-		var players []*betting.Player
+		players := make([]*betting.Player, 0, len(betting_strategies))
 		for _, bs := range betting_strategies {
 			players = append(players, bs.NewPlayer())
 		}
+		rounds_cnt := 0
 		for len(players) > 0 {
 			// TODO: there should be a way to catch strategies that never win or lose
-			bet_won := rand.Float64() < single_win_probability
-			for idx := len(players) - 1; idx >= 0; idx-- {
-				pl := players[idx]
-				fmt.Printf("    Player %d with betting system '%v' current bank €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank)
+			rounds_cnt++
+			fmt.Printf("    Round %d\n", rounds_cnt)
+			this_round_players := make([]*betting.Player, 0, len(players))
+			bet_sizes := make([]decimal.Decimal, 0, len(players))
+			for idx, pl := range players {
 				bet_size, ok := pl.PlayNextBet()
 				if !ok {
 					fmt.Printf("    Player %d with betting system '%v' is out of money\n", idx, pl.BettingSystem.Name())
-					players = append(players[:idx], players[idx+1:]...)
 					continue
 				}
-				fmt.Printf("    Player %d with betting system '%v' current bank €%v, betted €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, bet_size)
+				this_round_players = append(this_round_players, pl)
+				bet_sizes = append(bet_sizes, bet_size)
+				fmt.Printf("    Player %d with betting system '%v' current bank €%v, betted €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank.Add(bet_size), bet_size)
+			}
+			bet_won := rand.Float64() < single_win_probability
+			if bet_won {
+				fmt.Println("    Players won")
+			} else {
+				fmt.Println("    Players lost")
+			}
+			players = make([]*betting.Player, 0, len(this_round_players))
+			for idx, pl := range this_round_players {
 				if bet_won {
-					bet_payout := bet_size.Mul(bet_multiplier)
+					bet_payout := bet_sizes[idx].Mul(bet_multiplier)
 					target_reached := pl.Win(bet_payout)
-					fmt.Printf("    Player %d with betting system '%v' current bank €%v, won €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, bet_payout)
 					if target_reached {
 						fmt.Printf("    Player %d with betting system '%v' current bank €%v, has reached their win target of €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank, pl.WinTarget)
-						players = append(players[:idx], players[idx+1:]...)
+						continue
 					}
 				} else {
-					fmt.Printf("    Player %d with betting system '%v' current bank €%v, lost\n", idx, pl.BettingSystem.Name(), pl.CurrentBank)
 					if pl.Lose() {
 						fmt.Printf("    Player %d with betting system '%v' is out of money\n", idx, pl.BettingSystem.Name())
-						players = append(players[:idx], players[idx+1:]...)
 						continue
 					}
 				}
+				players = append(players, pl)
+				fmt.Printf("    Player %d with betting system '%v' current bank €%v\n", idx, pl.BettingSystem.Name(), pl.CurrentBank)
 			}
+
+			fmt.Println("")
 		}
 	}
 }

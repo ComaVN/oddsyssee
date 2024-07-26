@@ -5,6 +5,8 @@
 package betting
 
 import (
+	"fmt"
+
 	"github.com/shopspring/decimal"
 )
 
@@ -21,7 +23,7 @@ func (pl *Player) PlayNextBet() (decimal.Decimal, bool) {
 	}
 	bet := pl.BettingSystem.NextBet(pl.CurrentBank)
 	if bet.GreaterThan(pl.CurrentBank) {
-		panic("Betting system proposes illegal bet")
+		panic(fmt.Sprintf("Betting system '%v' proposes illegal bet of €%v", pl.BettingSystem.Name(), bet))
 	}
 	pl.CurrentBank = pl.CurrentBank.Sub(bet)
 	return bet, true

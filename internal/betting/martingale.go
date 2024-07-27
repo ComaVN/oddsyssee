@@ -26,10 +26,10 @@ func (bs *martingaleStrategy) Name() string {
 // Implements [BettingSystem]
 // ATTN: This is not implement as "double bet each time you lose", but as "bet whatever takes you to the target"
 // TODO: this should take into account minimum bets, and repeatedly reach those as "sub-target".
-func (bs *martingaleStrategy) NextBet(current_bank decimal.Decimal) Bet {
-	bet_size := bs.WinTarget.Sub(current_bank)
-	if bet_size.GreaterThan(current_bank) {
-		return NewBet(current_bank)
+func (bs *martingaleStrategy) NextBet(currentBank decimal.Decimal) Bet {
+	betSize := bs.WinTarget.Sub(currentBank)
+	if betSize.GreaterThan(currentBank) {
+		return NewBet(currentBank)
 	}
-	return NewBet(bet_size)
+	return NewBet(betSize)
 }

@@ -16,29 +16,29 @@ func main() {
 	// TODO: this should be way more parameterized:
 	//  - games can have other odds than 1/1
 	//  - games can have multiple odds and probabilities, and betting strategies can take different odds at different times
-	single_win_probability := 18.0 / 37
+	singleWinProbability := 18.0 / 37
 	var game betting.NextOutcomer
-	game = betting.NewFixedProbabilityGame(single_win_probability)
+	game = betting.NewFixedProbabilityGame(singleWinProbability)
 	// game = betting.NewAlternatingGame(false)
 	// game = betting.WinningGame{}
 	// game = betting.LosingGame{}
-	min_bet := decimal.RequireFromString("5")
-	max_bet := decimal.RequireFromString("5")
-	bet_multiplier := decimal.NewFromInt(2)
+	minBet := decimal.RequireFromString("5")
+	maxBet := decimal.RequireFromString("5")
+	betMultiplier := decimal.NewFromInt(2)
 
 	// Player properties
-	player_props := betting.NewPlayerProps(
+	playerProps := betting.NewPlayerProps(
 		decimal.RequireFromString("1000"),
 		decimal.RequireFromString("1100"),
 	)
-	betting_strategies := []betting.BettingSystem{
-		betting.NewSingleBetStrategy(player_props),
-		betting.NewMartingaleStrategy(player_props),
-		betting.NewOscarsGrindStrategy(player_props),
+	bettingStrategies := []betting.BettingSystem{
+		betting.NewSingleBetStrategy(playerProps),
+		betting.NewMartingaleStrategy(playerProps),
+		betting.NewOscarsGrindStrategy(playerProps),
 	}
 
 	// Simulation properties
-	sim_repeats := 10 // Number of tines the full simulation is repeated
+	simRepeats := 10 // Number of tines the full simulation is repeated
 
 	fmt.Printf("Game properties:\n"+
 		"  Probability to win one bet: %.2f%%\n"+
@@ -50,28 +50,28 @@ func main() {
 		"Simulation properties:\n"+
 		"  runs: %d\n"+
 		"\n",
-		single_win_probability*100,
-		min_bet.StringFixedBank(2),
-		max_bet.StringFixedBank(2),
-		player_props.Bankroll.StringFixedBank(2),
-		player_props.WinTarget.StringFixedBank(2),
-		sim_repeats,
+		singleWinProbability*100,
+		minBet.StringFixedBank(2),
+		maxBet.StringFixedBank(2),
+		playerProps.Bankroll.StringFixedBank(2),
+		playerProps.WinTarget.StringFixedBank(2),
+		simRepeats,
 	)
 
 	fmt.Println("Starting simulation")
-	for i := 1; i <= sim_repeats; i++ {
+	for i := 1; i <= simRepeats; i++ {
 		fmt.Printf("  Run %d\n", i)
 		// Initialize players for each strategy
-		players := make([]betting.Player, 0, len(betting_strategies))
-		for idx, bs := range betting_strategies {
-			players = append(players, betting.NewPlayer(player_props, fmt.Sprintf("%d", idx), bs))
+		players := make([]betting.Player, 0, len(bettingStrategies))
+		for idx, bs := range bettingStrategies {
+			players = append(players, betting.NewPlayer(playerProps, fmt.Sprintf("%d", idx), bs))
 		}
-		rounds_cnt := 0
+		roundsCnt := 0
 		for {
 			// TODO: there should be a way to catch strategies that never win or lose
-			rounds_cnt++
-			fmt.Printf("    Round %d\n", rounds_cnt)
-			this_round_players := make([]betting.Player, 0, len(players))
+			roundsCnt++
+			fmt.Printf("    Round %d\n", roundsCnt)
+			thisRoundPlayers := make([]betting.Player, 0, len(players))
 			bets := make([]betting.PlayerBet, 0, len(players))
 			for _, pl := range players {
 				switch pl.PlayingCondition() {
@@ -89,16 +89,16 @@ func main() {
 					fmt.Printf("    Player %q with strategy %q passed\n", pl.Name(), pl.StrategyName())
 					continue
 				}
-				this_round_players = append(this_round_players, pl)
+				thisRoundPlayers = append(thisRoundPlayers, pl)
 				bets = append(bets, bet)
 				fmt.Printf("    Player %q with strategy %q current bank €%v, betted €%v\n", pl.Name(), pl.StrategyName(), pl.Bank(), bet.Size())
 			}
-			players = this_round_players
+			players = thisRoundPlayers
 			if len(players) == 0 {
 				break
 			}
-			bet_won := game.NextOutcome()
-			if bet_won {
+			betWon := game.NextOutcome()
+			if betWon {
 				fmt.Println("    Players won")
 			} else {
 				fmt.Println("    Players lost")
@@ -106,8 +106,8 @@ func main() {
 			for _, bet := range bets {
 				pl := bet.Player()
 				var outcome betting.Outcome
-				if bet_won {
-					outcome = betting.NewOutcome(bet, bet.Size().Mul(bet_multiplier))
+				if betWon {
+					outcome = betting.NewOutcome(bet, bet.Size().Mul(betMultiplier))
 				} else {
 					outcome = betting.NewOutcome(bet, decimal.Zero)
 				}

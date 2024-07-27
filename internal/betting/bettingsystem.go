@@ -10,5 +10,5 @@ import (
 
 type BettingSystem interface {
 	Name() string
-	NextBet(current_bank decimal.Decimal) Bet
+	NextBet(currentBank decimal.Decimal) Bet
 }

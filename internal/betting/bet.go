@@ -8,7 +8,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// An iterator, representing an infinite stream of boolean game outcomes.
 type Bet interface {
 	Size() decimal.Decimal
 }

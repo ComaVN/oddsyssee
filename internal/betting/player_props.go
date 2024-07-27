@@ -14,9 +14,9 @@ type PlayerProps struct {
 	WinTarget decimal.Decimal
 }
 
-func NewPlayerProps(bankroll decimal.Decimal, win_target decimal.Decimal) PlayerProps {
+func NewPlayerProps(bankroll decimal.Decimal, winTarget decimal.Decimal) PlayerProps {
 	return PlayerProps{
 		Bankroll:  bankroll,
-		WinTarget: win_target,
+		WinTarget: winTarget,
 	}
 }

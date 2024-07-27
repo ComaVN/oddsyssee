@@ -26,6 +26,6 @@ func (bs *singleBetStrategy) Name() string {
 }
 
 // Implements [BettingSystem]
-func (bs *singleBetStrategy) NextBet(current_bank decimal.Decimal) Bet {
+func (bs *singleBetStrategy) NextBet(currentBank decimal.Decimal) Bet {
 	return NewBet(bs.BetSize)
 }

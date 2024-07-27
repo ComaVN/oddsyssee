@@ -27,17 +27,17 @@ func (bs *oscarsGrindStrategy) Name() string {
 }
 
 // Implements [BettingSystem]
-func (bs *oscarsGrindStrategy) NextBet(current_bank decimal.Decimal) Bet {
-	previous_bet_won := current_bank.GreaterThan(bs.previousBank)
-	bs.previousBank = current_bank
-	if previous_bet_won {
+func (bs *oscarsGrindStrategy) NextBet(currentBank decimal.Decimal) Bet {
+	previousBetWon := currentBank.GreaterThan(bs.previousBank)
+	bs.previousBank = currentBank
+	if previousBetWon {
 		bs.currentBetSize = bs.currentBetSize.Add(bs.WinTarget).Sub(bs.Bankroll)
-		if current_bank.Add(bs.currentBetSize).GreaterThan(bs.WinTarget) {
-			bs.currentBetSize = bs.WinTarget.Sub(current_bank)
+		if currentBank.Add(bs.currentBetSize).GreaterThan(bs.WinTarget) {
+			bs.currentBetSize = bs.WinTarget.Sub(currentBank)
 		}
 	}
-	if bs.currentBetSize.GreaterThan(current_bank) {
-		return NewBet(current_bank)
+	if bs.currentBetSize.GreaterThan(currentBank) {
+		return NewBet(currentBank)
 	}
 	return NewBet(bs.currentBetSize)
 }

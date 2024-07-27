@@ -10,30 +10,73 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type Player interface {
+	Name() string
+	StrategyName() string
+	Bank() decimal.Decimal
+	PlayingCondition() PlayingCondition
+	PlaceNextBet() (PlayerBet, bool)
+	HandleOutcome(outcome Outcome)
+}
+
 // Contains the properties of the player at the start of the gambling session
-type Player struct {
+type player struct {
 	PlayerProps
-	CurrentBank   decimal.Decimal
-	BettingSystem BettingSystem
+	name          string
+	currentBank   decimal.Decimal
+	bettingSystem BettingSystem
 }
 
-func (pl *Player) PlaceNextBet() (decimal.Decimal, bool) {
-	if !pl.CurrentBank.IsPositive() {
-		return decimal.Decimal{}, false
+// Implements [Player]
+func (pl *player) Name() string {
+	return pl.name
+}
+
+// Implements [Player]
+func (pl *player) StrategyName() string {
+	return pl.bettingSystem.Name()
+}
+
+// Implements [Player]
+func (pl *player) Bank() decimal.Decimal {
+	return pl.currentBank
+}
+
+// Implements [Player] using a betting system
+// This assumes all betting systems only pass when out of money
+func (pl *player) PlaceNextBet() (PlayerBet, bool) {
+	if !pl.currentBank.IsPositive() {
+		return nil, false
 	}
-	bet := pl.BettingSystem.NextBet(pl.CurrentBank)
-	if bet.GreaterThan(pl.CurrentBank) {
-		panic(fmt.Sprintf("Betting system '%v' proposes illegal bet of €%v", pl.BettingSystem.Name(), bet))
+	bet := pl.bettingSystem.NextBet(pl.currentBank)
+	if bet.Size().GreaterThan(pl.currentBank) {
+		panic(fmt.Sprintf("Betting system '%v' proposes illegal bet of €%v", pl.bettingSystem.Name(), bet))
 	}
-	pl.CurrentBank = pl.CurrentBank.Sub(bet)
-	return bet, true
+	pl.currentBank = pl.currentBank.Sub(bet.Size())
+	return NewPlayerBet(pl, bet), true
 }
 
-func (pl *Player) Win(won_amount decimal.Decimal) bool {
-	pl.CurrentBank = pl.CurrentBank.Add(won_amount)
-	return pl.CurrentBank.GreaterThanOrEqual(pl.WinTarget)
+// Implements [Player]
+func (pl *player) PlayingCondition() PlayingCondition {
+	if pl.currentBank.GreaterThanOrEqual(pl.WinTarget) {
+		return Won
+	}
+	if !pl.currentBank.IsPositive() {
+		return Lost
+	}
+	return Playing
 }
 
-func (pl *Player) Lose() bool {
-	return !pl.CurrentBank.IsPositive()
+// Implements [Player]
+func (pl *player) HandleOutcome(outcome Outcome) {
+	pl.currentBank = pl.currentBank.Add(outcome.Payout())
+}
+
+func NewPlayer(playerProps PlayerProps, name string, bettingSystem BettingSystem) Player {
+	return &player{
+		PlayerProps:   playerProps,
+		name:          name,
+		currentBank:   playerProps.Bankroll,
+		bettingSystem: bettingSystem,
+	}
 }

@@ -10,7 +10,6 @@ import (
 
 type martingaleStrategy struct {
 	PlayerProps
-	previousBank decimal.Decimal
 }
 
 func NewMartingaleStrategy(playerProps PlayerProps) *martingaleStrategy {
@@ -19,29 +18,18 @@ func NewMartingaleStrategy(playerProps PlayerProps) *martingaleStrategy {
 	}
 }
 
-// Implements BettingSystem
+// Implements [BettingSystem]
 func (bs *martingaleStrategy) Name() string {
 	return "Martingale"
 }
 
-// Implements BettingSystem
-func (bs *martingaleStrategy) NextBet(current_bank decimal.Decimal) decimal.Decimal {
-	previous_bet_won := current_bank.GreaterThan(bs.previousBank)
-	bs.previousBank = current_bank
-	if previous_bet_won {
-		return bs.WinTarget.Sub(bs.Bankroll)
-	}
+// Implements [BettingSystem]
+// ATTN: This is not implement as "double bet each time you lose", but as "bet whatever takes you to the target"
+// TODO: this should take into account minimum bets, and repeatedly reach those as "sub-target".
+func (bs *martingaleStrategy) NextBet(current_bank decimal.Decimal) Bet {
 	bet_size := bs.WinTarget.Sub(current_bank)
 	if bet_size.GreaterThan(current_bank) {
-		return current_bank
+		return NewBet(current_bank)
 	}
-	return bet_size
-}
-
-func (bs *martingaleStrategy) NewPlayer() *Player {
-	return &Player{
-		PlayerProps:   bs.PlayerProps,
-		CurrentBank:   bs.Bankroll,
-		BettingSystem: bs,
-	}
+	return NewBet(bet_size)
 }

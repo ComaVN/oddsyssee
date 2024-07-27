@@ -20,20 +20,12 @@ func NewSingleBetStrategy(playerProps PlayerProps) *singleBetStrategy {
 	}
 }
 
-// Implements BettingSystem
+// Implements [BettingSystem]
 func (bs *singleBetStrategy) Name() string {
 	return "Single Bet"
 }
 
-// Implements BettingSystem
-func (bs *singleBetStrategy) NextBet(current_bank decimal.Decimal) decimal.Decimal {
-	return bs.BetSize
-}
-
-func (bs *singleBetStrategy) NewPlayer() *Player {
-	return &Player{
-		PlayerProps:   bs.PlayerProps,
-		CurrentBank:   bs.Bankroll,
-		BettingSystem: bs,
-	}
+// Implements [BettingSystem]
+func (bs *singleBetStrategy) NextBet(current_bank decimal.Decimal) Bet {
+	return NewBet(bs.BetSize)
 }

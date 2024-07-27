@@ -21,13 +21,13 @@ func NewOscarsGrindStrategy(playerProps PlayerProps) *oscarsGrindStrategy {
 	}
 }
 
-// Implements BettingSystem
+// Implements [BettingSystem]
 func (bs *oscarsGrindStrategy) Name() string {
 	return "Oscar's Grind"
 }
 
-// Implements BettingSystem
-func (bs *oscarsGrindStrategy) NextBet(current_bank decimal.Decimal) decimal.Decimal {
+// Implements [BettingSystem]
+func (bs *oscarsGrindStrategy) NextBet(current_bank decimal.Decimal) Bet {
 	previous_bet_won := current_bank.GreaterThan(bs.previousBank)
 	bs.previousBank = current_bank
 	if previous_bet_won {
@@ -37,15 +37,7 @@ func (bs *oscarsGrindStrategy) NextBet(current_bank decimal.Decimal) decimal.Dec
 		}
 	}
 	if bs.currentBetSize.GreaterThan(current_bank) {
-		return current_bank
+		return NewBet(current_bank)
 	}
-	return bs.currentBetSize
-}
-
-func (bs *oscarsGrindStrategy) NewPlayer() *Player {
-	return &Player{
-		PlayerProps:   bs.PlayerProps,
-		CurrentBank:   bs.Bankroll,
-		BettingSystem: bs,
-	}
+	return NewBet(bs.currentBetSize)
 }

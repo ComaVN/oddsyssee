@@ -4,11 +4,10 @@
 
 package betting
 
-import (
-	"github.com/shopspring/decimal"
-)
+type PlayingCondition int
 
-type BettingSystem interface {
-	Name() string
-	NextBet(current_bank decimal.Decimal) Bet
-}
+const (
+	Lost PlayingCondition = iota - 1
+	Playing
+	Won
+)

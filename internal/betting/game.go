@@ -1,3 +1,7 @@
+// Copyright 2024 Roel Harbers.
+// Use of this source code is governed by the BEER-WARE license
+// that can be found in the LICENSE file.
+
 package betting
 
 import "math/rand/v2"
@@ -17,21 +21,21 @@ func NewFixedProbabilityGame(probability float64) *fixedProbabilityGame {
 	}
 }
 
-// Implements NextOutcomer
+// Implements [NextOutcomer]
 func (g *fixedProbabilityGame) NextOutcome() bool {
 	return rand.Float64() < g.probability
 }
 
 type LosingGame struct{}
 
-// Implements NextOutcomer
+// Implements [NextOutcomer]
 func (g LosingGame) NextOutcome() bool {
 	return false
 }
 
 type WinningGame struct{}
 
-// Implements NextOutcomer
+// Implements [NextOutcomer]
 func (g WinningGame) NextOutcome() bool {
 	return true
 }
@@ -40,7 +44,7 @@ type alternatingGame struct {
 	nextOutcome bool
 }
 
-// Implements NextOutcomer
+// Implements [NextOutcomer]
 func (g *alternatingGame) NextOutcome() bool {
 	outcome := g.nextOutcome
 	g.nextOutcome = !outcome
